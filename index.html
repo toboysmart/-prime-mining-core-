@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mine Coin Network - Web Miner</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: #1e293b; border-radius: 16px; width: 100%; max-width: 450px; padding: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #334155; text-align: center; }
+        h1 { font-size: 1.5rem; color: #38bdf8; margin-bottom: 8px; }
+        p.subtitle { color: #94a3b8; font-size: 0.875rem; margin-bottom: 24px; }
+        .balance-box { background: #0f172a; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #1e293b; }
+        .balance-label { color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .balance-value { font-size: 2.2rem; font-weight: bold; color: #4ade80; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: #334155; padding: 12px; border-radius: 8px; font-size: 0.85rem; }
+        .stat-card span { display: block; color: #cbd5e1; margin-top: 4px; font-weight: bold; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: #0284c7; color: white; }
+        .btn-start:hover { background: #0369a1; }
+        .btn-stop { background: #ef4444; color: white; }
+        .btn-stop:hover { background: #dc2626; }
+        .console { background: #000; color: #22c55e; font-family: monospace; font-size: 0.75rem; padding: 12px; border-radius: 8px; height: 100px; overflow-y: auto; text-align: left; margin-top: 20px; border: 1px solid #1e293b; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>⚡ MINE COIN NODE</h1>
+    <p class="subtitle">Simulated Cloud & Browser Mining Interface</p>
+
+    <div class="balance-box">
+        <div class="balance-label">Total Mined Balance</div>
+        <div class="balance-value" id="balance">0.0000 MINE</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">Hash Rate<span id="hashrate">0 H/s</span></div>
+        <div class="stat-card">Status<span id="status" style="color:#ef4444;">Offline</span></div>
+    </div>
+
+    <button id="mineBtn" class="btn btn-start" onclick="toggleMining()">Start Mining</button>
+
+    <div class="console" id="consoleLog">
+        > System ready. Press "Start Mining" to connect to pool...<br>
+    </div>
+</div>
+
+<script>
+    let isMining = false;
+    let balance = parseFloat(localStorage.getItem('mine_balance')) || 0;
+    let timer = null;
+    
+    document.getElementById('balance').innerText = balance.toFixed(4) + " MINE";
+
+    function log(msg) {
+        const consoleEl = document.getElementById('consoleLog');
+        consoleEl.innerHTML += `> ${msg}<br>`;
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    function toggleMining() {
+        const btn = document.getElementById('mineBtn');
+        const status = document.getElementById('status');
+        const hashrate = document.getElementById('hashrate');
+
+        if (!isMining) {
+            isMining = true;
+            btn.innerText = "Stop Mining";
+            btn.className = "btn btn-stop";
+            status.innerText = "Mining Active";
+            status.style.color = "#4ade80";
+            log("Connecting to stratum pool...");
+            
+            setTimeout(() => {
+                log("Connected! Submitting hashes...");
+                timer = setInterval(() => {
+                    let speed = (Math.random() * 45 + 105).toFixed(2);
+                    hashrate.innerText = speed + " H/s";
+                    
+                    let reward = 0.0005;
+                    balance += reward;
+                    localStorage.setItem('mine_balance', balance);
+                    document.getElementById('balance').innerText = balance.toFixed(4) + " MINE";
+                    
+                    if (Math.random() > 0.6) {
+                        log(`Share accepted! +${reward} MINE`);
+                    }
+                }, 2000);
+            }, 1000);
+
+        } else {
+            isMining = false;
+            clearInterval(timer);
+            btn.innerText = "Start Mining";
+            btn.className = "btn btn-start";
+            status.innerText = "Offline";
+            status.style.color = "#ef4444";
+            hashrate.innerText = "0 H/s";
+            log("Mining stopped by user.");
+        }
+    }
+</script>
+
+</body>
+</html>
